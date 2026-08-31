@@ -58,4 +58,13 @@ do {
     Reboot-Check;
 } while (($dismClean -eq 0) -or ($sfcClean -eq 0))
 
+#Disk Scan Section
+Write-Host "Beginning Disk Integrity Check"
+Get-PSDrive -PSProvider FileSystem | ForEach-Object {
+    $Drive = $_.Name
+    Write-Host "Scanning drive $Drive"
+    Repair-Volume -DriveLetter $Drive -Scan
+    Write-Host "Drive $Drive Complete"
+}
+
 Write-Host "System Scan Completed";
