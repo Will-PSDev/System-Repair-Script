@@ -78,7 +78,4 @@ Get-PSDrive -PSProvider FileSystem | ForEach-Object {
     
 }
 
-
-Write-Host "System Scan Completed";
-
 Write-Host "System Scan Completed";
