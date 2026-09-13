@@ -59,12 +59,26 @@ do {
 } while (($dismClean -eq 0) -or ($sfcClean -eq 0))
 
 #Disk Scan Section
-Write-Host "Beginning Disk Integrity Check"
+Write-Host "Beginning Disk Integrity Check";
 Get-PSDrive -PSProvider FileSystem | ForEach-Object {
-    $Drive = $_.Name
-    Write-Host "Scanning drive $Drive"
-    Repair-Volume -DriveLetter $Drive -Scan
-    Write-Host "Drive $Drive Complete"
+    $Drive = $_.Name;
+    Write-Host "Scanning drive $Drive" -NoNewLine;
+    $scanresult = Repair-Volume -DriveLetter $Drive -Scan #actual drive scan;
+    if ($scanresult -eq 0){ #if scan returns clean
+        Write-Host "`rDrive $Drive Complete, no issues detected.";
+    }
+    else { #if scan returns issues
+        Write-Host "`rDrive $Drive Complete, issues detected";
+        $spotfix = Read-Host "Would you like to begin drive repair? This will temporarily take the drive offline. Y/n";
+        if ($spotfix -eq "Y"){
+            Repair-Volume -DriveLetter $Drive -SpotFix
+        }
+
+    }
+    
 }
+
+
+Write-Host "System Scan Completed";
 
 Write-Host "System Scan Completed";
