@@ -77,5 +77,11 @@ Get-PSDrive -PSProvider FileSystem | ForEach-Object {
     }
     
 }
+Write-Host "Disk Integrity Check Complete";
+
+#Volume/Disk Optimization, this will defrag/ReTrim each disk on the machine
+Write-Host "Beginning Drive Optimization";
+Get-Volume | Optimize-Volume -Verbose;
+Write-Host "Drive Optimization Complete";
 
 Write-Host "System Scan Completed";
