@@ -58,6 +58,14 @@ do {
     Reboot-Check;
 } while (($dismClean -eq 0) -or ($sfcClean -eq 0))
 
+#Begginning Component Store Housekeeping
+$result = DISM /Online /Cleanup-Image /AnalyzeComponentStore;
+if($result -match "Component Store Cleanup Recommended : Yes"){
+    write-host $result;
+    Write-Host "Beginning Component Store Cleanup";
+    DISM /Online /Cleanup-Image /StartComponentCleanup;
+}
+
 #Disk Scan Section
 Write-Host "Beginning Disk Integrity Check";
 Get-PSDrive -PSProvider FileSystem | ForEach-Object {
