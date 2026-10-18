@@ -1,13 +1,26 @@
 #Variable Declaration
 $dismClean = 0; #tracks if a clean dism scan was returned 0 means no, 1 means yes
 $sfcClean = 0; #tracks if a clean sfc scan was returned 0 means no, 1 means yes
+$logFile = ".\System-Repair-Script-Log.txt"; #file path for log file, may be customizable in future updates
+
+#check if log file exists
+if (Test-Path -Path $logFile) {
+    $overwritelog = Read-Host "A previous log for system repair script already exists, overwrie log? Y/n";
+    if ($overwritelog -eq "Y"){
+    Clear-Content -Path $logFile;
+    }
+    "Begin Logging Script activity" | Out-File -FilePath $logFile -Append
+    Start-Transcript -Path $logFile -Append
+}
 
 #Functions
 function Reboot-Check {  #Checks if a reboot is needed, then asks if the user wants to reboot after first determining that a reboot is needed. If a reboot is not needed this does nothing
     if ((Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending") -eq "True"){
         $reboot = Read-Host "A reboot is pending, reboot now? Y/n";
         if ($reboot -eq "Y"){
-            Restart-Computer
+            Stop-Transcript;
+            Restart-Computer;
+            Exit;
         }
     }
 }
@@ -93,3 +106,5 @@ Get-Volume | Optimize-Volume -Verbose;
 Write-Host "Drive Optimization Complete";
 
 Write-Host "System Scan Completed";
+Stop-Transcript;
+Exit;
