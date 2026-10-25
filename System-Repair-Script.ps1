@@ -9,9 +9,9 @@ if (Test-Path -Path $logFile) {
     if ($overwritelog -eq "Y"){
     Clear-Content -Path $logFile;
     }
-    "Begin Logging Script activity" | Out-File -FilePath $logFile -Append
-    Start-Transcript -Path $logFile -Append
 }
+"Begin Logging Script activity" | Out-File -FilePath $logFile -Append
+Start-Transcript -Path $logFile -Append
 
 #Functions
 function Reboot-Check {  #Checks if a reboot is needed, then asks if the user wants to reboot after first determining that a reboot is needed. If a reboot is not needed this does nothing
@@ -49,7 +49,7 @@ do {
 
     #SFC Section
     Write-Host "Begininng SFC Scan";
-    sfc /verifyonly
+    sfc /verifyonly | Out-Null;
     switch ($LASTEXITCODE) {
         0 { 
             Write-Host "SFC Complete! No corruption found"; 
@@ -102,7 +102,12 @@ Write-Host "Disk Integrity Check Complete";
 
 #Volume/Disk Optimization, this will defrag/ReTrim each disk on the machine
 Write-Host "Beginning Drive Optimization";
-Get-Volume | Optimize-Volume -Verbose;
+Get-Volume |
+    Where-Object {
+        $_.DriveLetter -and
+        $_.FileSystemType -in @('NTFS', 'ReFS') #-and
+        $_.Size -ge 100MB
+    } | Optimize-Volume -Verbose
 Write-Host "Drive Optimization Complete";
 
 Write-Host "System Scan Completed";
