@@ -2,6 +2,7 @@
 $dismClean = 0; #tracks if a clean dism scan was returned 0 means no, 1 means yes
 $sfcClean = 0; #tracks if a clean sfc scan was returned 0 means no, 1 means yes
 $logFile = ".\System-Repair-Script-Log.txt"; #file path for log file, may be customizable in future updates
+$stage = 0; #tracks what stage the scan is in.
 
 #check if log file exists
 if (Test-Path -Path $logFile) {
@@ -26,6 +27,8 @@ function Reboot-Check {  #Checks if a reboot is needed, then asks if the user wa
 }
 
 #Begin Main Code
+$stage = 1;
+Write-Host "Begin Stage 1: System Integrity Scans";
 #Loop recursively runs through system repair until a clean scan is returned by both DISM and SFC
 do {
     #DISM Section
@@ -72,6 +75,8 @@ do {
 } while (($dismClean -eq 0) -or ($sfcClean -eq 0))
 
 #Begginning Component Store Housekeeping
+$stage = 2;
+Write-Host "Beginning Stage 2: Component Store Analysis";
 $result = DISM /Online /Cleanup-Image /AnalyzeComponentStore;
 if($result -match "Component Store Cleanup Recommended : Yes"){
     write-host $result;
@@ -80,7 +85,8 @@ if($result -match "Component Store Cleanup Recommended : Yes"){
 }
 
 #Disk Scan Section
-Write-Host "Beginning Disk Integrity Check";
+$stage = 3;
+Write-Host "Beginning Stage 3: Disk Integrity Check";
 Get-PSDrive -PSProvider FileSystem | ForEach-Object {
     $Drive = $_.Name;
     Write-Host "Scanning drive $Drive" -NoNewLine;
@@ -101,7 +107,8 @@ Get-PSDrive -PSProvider FileSystem | ForEach-Object {
 Write-Host "Disk Integrity Check Complete";
 
 #Volume/Disk Optimization, this will defrag/ReTrim each disk on the machine
-Write-Host "Beginning Drive Optimization";
+$stage = 4;
+Write-Host "Beginning Stage 4: Drive Optimization";
 Get-Volume |
     Where-Object {
         $_.DriveLetter -and
